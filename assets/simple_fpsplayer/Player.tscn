@@ -1,0 +1,73 @@
+[gd_scene load_steps=11 format=3 uid="uid://dgpjxoygnvyy4"]
+
+[ext_resource type="Script" path="res://assets/simple_fpsplayer/Player.gd" id="1_1fhis"]
+[ext_resource type="Script" path="res://assets/simple_fpsplayer/ability_grab.gd" id="2_gwqkd"]
+[ext_resource type="Shader" path="res://scenes/test_scene.gdshader" id="3_564g4"]
+[ext_resource type="Texture2D" uid="uid://ul8xrf0ov31w" path="res://crosshatch_b.png" id="4_a6og8"]
+[ext_resource type="Texture2D" uid="uid://pw25tgn83x8n" path="res://crosshatch_g.png" id="5_ssb63"]
+[ext_resource type="Texture2D" uid="uid://bs14iomrxk7lv" path="res://crosshatch_r.png" id="6_t3buv"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_euj4i"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_sajgw"]
+frequency = 0.0431
+domain_warp_fractal_gain = 0.035
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_7f0cg"]
+width = 100
+height = 100
+as_normal_map = true
+normalize = false
+noise = SubResource("FastNoiseLite_sajgw")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_joqpq"]
+render_priority = 0
+shader = ExtResource("3_564g4")
+shader_parameter/noise_strength = 1.565
+shader_parameter/CROSS_HATCH_SCALE = 7.965
+shader_parameter/CROSS_HATCH_STRENGTH = 2.035
+shader_parameter/LOWER = 0.26
+shader_parameter/MID = 1.335
+shader_parameter/UPPER = 2.735
+shader_parameter/DEPTH_DEADZONE = 1.0
+shader_parameter/MODELVIEWPROJ = null
+shader_parameter/NOISE_PATTERN = SubResource("NoiseTexture2D_7f0cg")
+shader_parameter/CROSS_HATCH_R = ExtResource("6_t3buv")
+shader_parameter/CROSS_HATCH_G = ExtResource("5_ssb63")
+shader_parameter/CROSS_HATCH_B = ExtResource("4_a6og8")
+
+[node name="Player" type="CharacterBody3D"]
+disable_mode = 2
+floor_max_angle = 0.802851
+script = ExtResource("1_1fhis")
+
+[node name="body" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_euj4i")
+
+[node name="rotation_helper" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+
+[node name="Camera3D" type="Camera3D" parent="rotation_helper"]
+current = true
+near = 0.001
+
+[node name="flashlight_player" type="SpotLight3D" parent="rotation_helper/Camera3D"]
+visible = false
+light_energy = 3.0
+light_bake_mode = 0
+spot_range = 10.0
+spot_angle = 15.0
+spot_angle_attenuation = 1.56917
+
+[node name="ability_grab" type="RayCast3D" parent="rotation_helper/Camera3D"]
+target_position = Vector3(0, 0, -2)
+script = ExtResource("2_gwqkd")
+
+[node name="GrabPosition3D" type="Marker3D" parent="rotation_helper/Camera3D/ability_grab"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="rotation_helper/Camera3D"]
+transform = Transform3D(0.999693, -0.000821023, 0.0247495, 0, 0.999451, 0.0331552, -0.024763, -0.033145, 0.999144, -0.251035, 0.0837266, -0.579648)
+visible = false
+size = Vector3(4.39544, 2.43005, 0.002)
+material = SubResource("ShaderMaterial_joqpq")

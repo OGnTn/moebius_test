@@ -1,0 +1,232 @@
+[gd_scene load_steps=21 format=3 uid="uid://dvykowhyr0amg"]
+
+[ext_resource type="Shader" path="res://scenes/test_scene.gdshader" id="1_q36e7"]
+[ext_resource type="Texture2D" uid="uid://hyj7myffr2q2" path="res://Brick_Wall_017_normal.jpg" id="2_lmb6l"]
+[ext_resource type="PackedScene" uid="uid://bhkktb8ridoxg" path="res://GLB format/character-skeleton.glb" id="2_ruvx6"]
+[ext_resource type="PackedScene" uid="uid://cr0iqa3wdfntv" path="res://GLB format/character-vampire.glb" id="3_iiwpu"]
+[ext_resource type="Texture2D" uid="uid://ul8xrf0ov31w" path="res://crosshatch_b.png" id="4_3qo2c"]
+[ext_resource type="PackedScene" uid="uid://bahorv34l8uk4" path="res://GLB format/coffin-old.glb" id="4_8y6x5"]
+[ext_resource type="Texture2D" uid="uid://pw25tgn83x8n" path="res://crosshatch_g.png" id="5_grvdu"]
+[ext_resource type="PackedScene" uid="uid://b0t7cbj3vjhvg" path="res://GLB format/crypt-door.glb" id="5_w15hc"]
+[ext_resource type="PackedScene" uid="uid://cccohy64vvaag" path="res://GLB format/crypt-small.glb" id="6_aixv1"]
+[ext_resource type="Texture2D" uid="uid://bs14iomrxk7lv" path="res://crosshatch_r.png" id="6_wd4x3"]
+[ext_resource type="PackedScene" uid="uid://dgpjxoygnvyy4" path="res://assets/simple_fpsplayer/Player.tscn" id="13_ysxr2"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_njhvv"]
+size = Vector3(19.5082, 0.874515, 12.8827)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0on3l"]
+albedo_color = Color(0.898039, 0.0509804, 0, 1)
+normal_enabled = true
+normal_scale = 7.88
+normal_texture = ExtResource("2_lmb6l")
+
+[sub_resource type="Shader" id="Shader_6nkae"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.1.2.stable's StandardMaterial3D.
+
+shader_type spatial;
+render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
+uniform vec4 albedo : source_color;
+uniform sampler2D texture_albedo : source_color,filter_linear_mipmap,repeat_enable;
+uniform float point_size : hint_range(0,128);
+uniform float roughness : hint_range(0,1);
+uniform sampler2D texture_metallic : hint_default_white,filter_linear_mipmap,repeat_enable;
+uniform vec4 metallic_texture_channel;
+uniform sampler2D texture_roughness : hint_roughness_r,filter_linear_mipmap,repeat_enable;
+uniform float specular;
+uniform float metallic;
+uniform vec3 uv1_scale;
+uniform vec3 uv1_offset;
+uniform vec3 uv2_scale;
+uniform vec3 uv2_offset;
+uniform sampler2D NORMAL_TEXTURE : hint_normal_roughness_texture;
+uniform sampler2D DEPTH_TEXTURE : source_color, hint_depth_texture, filter_linear_mipmap;
+uniform sampler2D CROSS_HATCH_R;
+uniform sampler2D CROSS_HATCH_G;
+uniform sampler2D CROSS_HATCH_B;
+uniform float CROSS_HATCH_SCALE = 1.0;
+uniform float CROSS_HATCH_STRENGTH = 1.0;
+uniform sampler2D SCREEN_TEXTURE : hint_screen_texture;
+uniform float DEPTH_DEADZONE = 1.0;
+//uniform vec4 albedo : source_color;
+uniform float LOWER = 0.2;
+uniform float MID = 0.5;
+uniform float UPPER = 0.75;
+
+void vertex() {
+	UV=UV*uv1_scale.xy+uv1_offset.xy;
+}
+
+
+
+
+
+
+void fragment() {
+	vec2 base_uv = UV;
+	vec4 albedo_tex = texture(texture_albedo,base_uv);
+	ALBEDO = albedo.rgb * albedo_tex.rgb;
+	float metallic_tex = dot(texture(texture_metallic,base_uv),metallic_texture_channel);
+	METALLIC = metallic_tex * metallic;
+	vec4 roughness_texture_channel = vec4(1.0,0.0,0.0,0.0);
+	float roughness_tex = dot(texture(texture_roughness,base_uv),roughness_texture_channel);
+	ROUGHNESS = roughness_tex * roughness;
+	SPECULAR = specular;
+	
+	float luminance = 0.0;
+	luminance += texture(SCREEN_TEXTURE, SCREEN_UV).r;
+	luminance += texture(SCREEN_TEXTURE, SCREEN_UV).g;
+	luminance += texture(SCREEN_TEXTURE, SCREEN_UV).b;
+	
+	float r_lum = 1.0 - texture(CROSS_HATCH_R, SCREEN_UV * CROSS_HATCH_SCALE).r * CROSS_HATCH_STRENGTH;
+	float g_lum = 1.0 - texture(CROSS_HATCH_G, SCREEN_UV * CROSS_HATCH_SCALE).g * CROSS_HATCH_STRENGTH;
+	float b_lum = 1.0 - texture(CROSS_HATCH_B, SCREEN_UV * CROSS_HATCH_SCALE).b * CROSS_HATCH_STRENGTH;
+	
+		if(luminance < LOWER) {
+		NORMAL *= r_lum;
+		NORMAL *= g_lum;
+		NORMAL *= b_lum;
+		}
+		else if(luminance < MID) {
+			NORMAL *= r_lum;
+			NORMAL *= g_lum;
+			//NORMAL *= texture(CROSS_HATCH, SCREEN_UV * CROSS_HATCH_SCALE).g;
+		}
+		else if(luminance < UPPER) {
+			NORMAL *= r_lum;
+		}
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_65m3u"]
+render_priority = 0
+shader = SubResource("Shader_6nkae")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/point_size = 1.0
+shader_parameter/roughness = 1.0
+shader_parameter/metallic_texture_channel = null
+shader_parameter/specular = 0.5
+shader_parameter/metallic = 0.0
+shader_parameter/uv1_scale = Vector3(1, 1, 1)
+shader_parameter/uv1_offset = Vector3(0, 0, 0)
+shader_parameter/uv2_scale = Vector3(1, 1, 1)
+shader_parameter/uv2_offset = Vector3(0, 0, 0)
+shader_parameter/CROSS_HATCH_SCALE = 1.58
+shader_parameter/CROSS_HATCH_STRENGTH = 2.495
+shader_parameter/DEPTH_DEADZONE = 0.84
+shader_parameter/LOWER = 0.19
+shader_parameter/MID = 0.5
+shader_parameter/UPPER = 0.75
+shader_parameter/CROSS_HATCH_R = ExtResource("6_wd4x3")
+shader_parameter/CROSS_HATCH_G = ExtResource("5_grvdu")
+shader_parameter/CROSS_HATCH_B = ExtResource("4_3qo2c")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wgoc2"]
+albedo_color = Color(0.705882, 0.360784, 0.0666667, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_nlfsn"]
+frequency = 0.0431
+domain_warp_fractal_gain = 0.035
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_7gr5s"]
+width = 100
+height = 100
+as_normal_map = true
+normalize = false
+noise = SubResource("FastNoiseLite_nlfsn")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ge6ms"]
+render_priority = 0
+shader = ExtResource("1_q36e7")
+shader_parameter/noise_strength = 1.565
+shader_parameter/CROSS_HATCH_SCALE = 7.965
+shader_parameter/CROSS_HATCH_STRENGTH = 2.035
+shader_parameter/LOWER = 0.26
+shader_parameter/MID = 1.335
+shader_parameter/UPPER = 2.735
+shader_parameter/DEPTH_DEADZONE = 1.0
+shader_parameter/MODELVIEWPROJ = null
+shader_parameter/NOISE_PATTERN = SubResource("NoiseTexture2D_7gr5s")
+shader_parameter/CROSS_HATCH_R = ExtResource("6_wd4x3")
+shader_parameter/CROSS_HATCH_G = ExtResource("5_grvdu")
+shader_parameter/CROSS_HATCH_B = ExtResource("4_3qo2c")
+
+[sub_resource type="Environment" id="Environment_j35ue"]
+background_mode = 1
+background_color = Color(0.305882, 0.517647, 1, 1)
+background_energy_multiplier = 0.39
+
+[node name="Node3D" type="Node3D"]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+use_collision = true
+size = Vector3(12.9284, 1, 20.6055)
+
+[node name="Area3D" type="Area3D" parent="CSGBox3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CSGBox3D/Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.08427, 0, 3.26258)
+shape = SubResource("BoxShape3D_njhvv")
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0820016, 1.55314, 2.65364)
+
+[node name="CSGSphere3D2" type="CSGSphere3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.09627, 1.55314, -2.98504)
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 2.11444, 0)
+size = Vector3(1, 3.26533, 4.08117)
+material = SubResource("StandardMaterial3D_0on3l")
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.98733, 2.54348, 4.5368)
+height = 4.77205
+material = SubResource("ShaderMaterial_65m3u")
+
+[node name="CSGCylinder3D2" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.963745, 2.54348, -5.10778)
+height = 4.77205
+material = SubResource("StandardMaterial3D_wgoc2")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.730564, 0.0493787, 0.681056, -0.0203664, 0.998514, -0.0505484, -0.68254, 0.0230582, 0.730484, 1.89203, 3.27637, 6.89457)
+
+[node name="CSGBox3D3" type="CSGBox3D" parent="Camera3D"]
+transform = Transform3D(0.999693, -0.000821023, 0.0247495, 0, 0.999451, 0.0331552, -0.024763, -0.033145, 0.999144, -0.251035, 1.09526, -2.28185)
+size = Vector3(23.4981, 14.4831, 0.002)
+material = SubResource("ShaderMaterial_ge6ms")
+metadata/_edit_lock_ = true
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.395059, -0.501479, 0.769706, -0.194924, 0.864542, 0.46322, -0.897738, 0.0329649, -0.439296, -1.37923, 1.98248, -0.586022)
+light_energy = 0.529
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_j35ue")
+
+[node name="character-skeleton" parent="." instance=ExtResource("2_ruvx6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.31224, 1.72699, 0.47742)
+visible = false
+
+[node name="character-vampire" parent="." instance=ExtResource("3_iiwpu")]
+transform = Transform3D(2.105, 0, 0, 0, 2.105, 0, 0, 0, 2.105, -0.677, 0.499, 2.133)
+visible = false
+
+[node name="coffin-old" parent="." instance=ExtResource("4_8y6x5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.10219, 0.822282, 0.230533)
+
+[node name="coffin-old2" parent="." instance=ExtResource("4_8y6x5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.58064, 0.822282, -6.34103)
+
+[node name="crypt-door" parent="." instance=ExtResource("5_w15hc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.03428, 0.532884, 1.64077)
+
+[node name="crypt-small" parent="." instance=ExtResource("6_aixv1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.89116, 0.517078, 0.884737)
+
+[node name="Player" parent="." instance=ExtResource("13_ysxr2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.128164, 3.23971, 1.36663)
+
+[editable path="character-vampire"]
